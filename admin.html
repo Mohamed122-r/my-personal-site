@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم — محمد عبد الوهاب</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+
+  <!-- شاشة تسجيل الدخول -->
+  <div class="login-wrap" id="login-screen">
+    <div class="login-box">
+      <div class="icon">🔐</div>
+      <h1>لوحة التحكم</h1>
+      <p>سجّل دخولك للوصول إلى إدارة الموقع</p>
+      <form id="login-form">
+        <input type="email" id="login-email" placeholder="البريد الإلكتروني" required>
+        <input type="password" id="login-password" placeholder="كلمة السر" required>
+        <button type="submit">دخول</button>
+        <div class="login-error" id="login-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- الواجهة الرئيسية (مخفية لحد تسجيل الدخول) -->
+  <div id="admin-screen" style="display:none;">
+    <div class="admin-wrap">
+      <div class="admin-header">
+        <div>
+          <h1>👋 مرحباً بك</h1>
+          <div class="user" id="admin-email"></div>
+        </div>
+        <button class="btn-logout" id="btn-logout">تسجيل خروج</button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="content">📄 محتوى الصفحة</button>
+        <button class="admin-tab" data-tab="services">💼 الخدمات</button>
+        <button class="admin-tab" data-tab="projects">🖼️ الأعمال</button>
+        <button class="admin-tab" data-tab="requests">📬 الطلبات</button>
+        <button class="admin-tab" data-tab="contact">📞 التواصل</button>
+      </div>
+
+      <!-- تبويب محتوى الصفحة -->
+      <div class="admin-panel active" id="panel-content">
+        <h2>تعديل النص الترحيبي (الصفحة الرئيسية)</h2>
+        <form id="form-content">
+          <div class="form-group">
+            <label>العنوان الرئيسي</label>
+            <input type="text" id="hero-title-input" required>
+          </div>
+          <div class="form-group">
+            <label>العنوان الفرعي</label>
+            <input type="text" id="hero-subtitle-input" required>
+          </div>
+          <div class="form-group">
+            <label>الوصف</label>
+            <textarea id="hero-description-input" required></textarea>
+          </div>
+          <button type="submit" class="btn-primary-admin">💾 حفظ التعديلات</button>
+        </form>
+      </div>
+
+      <!-- تبويب الخدمات -->
+      <div class="admin-panel" id="panel-services">
+        <h2>إدارة الخدمات</h2>
+        <form id="form-service">
+          <input type="hidden" id="service-id">
+          <div class="form-group">
+            <label>اسم الخدمة</label>
+            <input type="text" id="service-title" required placeholder="مثال: تطوير المواقع">
+          </div>
+          <div class="form-group">
+            <label>الوصف</label>
+            <textarea id="service-description" required placeholder="وصف مختصر للخدمة"></textarea>
+          </div>
+          <div class="form-group">
+            <label>الأيقونة (إيموجي)</label>
+            <input type="text" id="service-icon" placeholder="🌐" maxlength="4">
+          </div>
+          <button type="submit" class="btn-primary-admin" id="btn-service-submit">➕ إضافة خدمة</button>
+          <button type="button" class="btn-sm btn-edit" id="btn-service-cancel" style="display:none;">إلغاء</button>
+        </form>
+        <div class="items-list" id="services-list"></div>
+      </div>
+
+      <!-- تبويب الأعمال -->
+      <div class="admin-panel" id="panel-projects">
+        <h2>إدارة معرض الأعمال</h2>
+        <form id="form-project">
+          <input type="hidden" id="project-id">
+          <div class="form-group">
+            <label>عنوان المشروع</label>
+            <input type="text" id="project-title" required>
+          </div>
+          <div class="form-group">
+            <label>الوصف</label>
+            <textarea id="project-description"></textarea>
+          </div>
+          <div class="form-group">
+            <label>رابط الصورة (URL)</label>
+            <input type="url" id="project-image" placeholder="https://example.com/image.jpg">
+          </div>
+          <div class="form-group">
+            <label>رابط المشروع</label>
+            <input type="url" id="project-link" placeholder="https://example.com">
+          </div>
+          <button type="submit" class="btn-primary-admin" id="btn-project-submit">➕ إضافة مشروع</button>
+          <button type="button" class="btn-sm btn-edit" id="btn-project-cancel" style="display:none;">إلغاء</button>
+        </form>
+        <div class="items-list" id="projects-list"></div>
+      </div>
+
+      <!-- تبويب الطلبات -->
+      <div class="admin-panel" id="panel-requests">
+        <h2>طلبات العملاء</h2>
+        <button class="btn-primary-admin" id="btn-refresh-requests" style="margin-bottom:15px;">🔄 تحديث</button>
+        <div id="requests-container">
+          <p class="loading">جاري التحميل...</p>
+        </div>
+      </div>
+
+      <!-- تبويب التواصل -->
+      <div class="admin-panel" id="panel-contact">
+        <h2>معلومات التواصل</h2>
+        <form id="form-contact">
+          <div class="form-group">
+            <label>رقم الواتساب (بصيغة دولية بدون +)</label>
+            <input type="text" id="contact-whatsapp" required placeholder="249960491276">
+          </div>
+          <div class="form-group">
+            <label>رابط حساب مستقل</label>
+            <input type="url" id="contact-mostaql">
+          </div>
+          <div class="form-group">
+            <label>رابط حساب خمسات</label>
+            <input type="url" id="contact-khamsat">
+          </div>
+          <div class="form-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="contact-email">
+          </div>
+          <button type="submit" class="btn-primary-admin">💾 حفظ</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- إشعار -->
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

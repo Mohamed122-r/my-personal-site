@@ -638,3 +638,388 @@ body {
     padding-bottom: 70px;
   }
 }
+
+/* ============================================
+   لوحة التحكم (Admin)
+   ============================================ */
+
+.admin-body {
+  background: #f1f5f9;
+  min-height: 100vh;
+  font-family: 'Tajawal', sans-serif;
+}
+
+/* شاشة تسجيل الدخول */
+.login-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-box {
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(30, 64, 175, 0.15);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.login-box .icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.login-box h1 {
+  color: #1e3a8a;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.login-box p {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 25px;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.login-box input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.login-box button {
+  width: 100%;
+  padding: 12px;
+  background: #1e40af;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.login-box button:hover {
+  background: #1e3a8a;
+}
+
+.login-error {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  display: none;
+}
+
+.login-error.show {
+  display: block;
+}
+
+/* الواجهة الرئيسية للوحة */
+.admin-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.admin-header h1 {
+  color: #1e3a8a;
+  font-size: 1.4rem;
+}
+
+.admin-header .user {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.btn-logout {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-logout:hover {
+  background: #dc2626;
+}
+
+/* التبويبات */
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.admin-tab {
+  padding: 12px 20px;
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.admin-tab:hover {
+  color: #1e40af;
+}
+
+.admin-tab.active {
+  background: #1e40af;
+  color: #fff;
+}
+
+/* البانلات */
+.admin-panel {
+  background: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: none;
+}
+
+.admin-panel.active {
+  display: block;
+}
+
+.admin-panel h2 {
+  color: #1e3a8a;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.admin-panel .form-group {
+  margin-bottom: 15px;
+}
+
+.admin-panel .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.admin-panel .form-group input,
+.admin-panel .form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+.admin-panel .form-group input:focus,
+.admin-panel .form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.admin-panel .form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.btn-primary-admin {
+  background: #1e40af;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+
+.btn-primary-admin:hover {
+  background: #1e3a8a;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  margin-inline-start: 5px;
+}
+
+.btn-edit {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.btn-edit:hover {
+  background: #d97706;
+}
+
+.btn-del {
+  background: #ef4444;
+  color: #fff;
+}
+
+.btn-del:hover {
+  background: #dc2626;
+}
+
+/* قوائم العناصر */
+.items-list {
+  margin-top: 20px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #f8fafc;
+}
+
+.item-row .info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-row .info h4 {
+  color: #1e3a8a;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.item-row .info p {
+  color: #64748b;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-row .actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* جدول الطلبات */
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.requests-table th {
+  background: #1e40af;
+  color: #fff;
+  padding: 12px;
+  text-align: right;
+  font-weight: 700;
+}
+
+.requests-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: right;
+}
+
+.requests-table tr:hover {
+  background: #f8fafc;
+}
+
+.requests-table .empty {
+  text-align: center;
+  color: #64748b;
+  padding: 30px;
+}
+
+/* إشعار */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: #10b981;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  z-index: 9999;
+  transition: transform 0.4s ease;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.error {
+  background: #ef4444;
+}
+
+/* تحميل */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  .requests-table {
+    font-size: 0.8rem;
+  }
+  .requests-table th,
+  .requests-table td {
+    padding: 8px 5px;
+  }
+}

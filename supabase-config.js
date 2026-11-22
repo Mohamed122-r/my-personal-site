@@ -5,11 +5,18 @@
 const SUPABASE_URL = "https://xqqhhguzcxhphjiwnuqc.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_DXxs_x_h-81QoKVKG8VYgw_Hg2MwkQb";
 
+// كائن Supabase الرسمي (للمصادقة والعمليات المتقدمة)
+// (يُستخدم في admin.js)
+let supabase = null;
+if (typeof window !== "undefined" && window.supabase && window.supabase.createClient) {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+// كائن مبسط للاستخدام في الصفحات العادية (index, services, ...)
 const supabaseClient = {
   url: SUPABASE_URL,
   key: SUPABASE_ANON_KEY,
 
-  // دالة موحدة لعمل الطلبات
   async request(path, options = {}) {
     const res = await fetch(`${this.url}/rest/v1/${path}`, {
       ...options,
@@ -51,22 +58,21 @@ const supabaseClient = {
   }
 };
 
-// بيانات احتياطية (تظهر فقط لو فشل الاتصال)
+// بيانات احتياطية
 const MOCK_DATA = {
   site_content: {
     hero_title: "محمد عبد الوهاب",
     hero_subtitle: "مطور مواقع وتطبيقات | أنظمة ERP | حلول رقمية متكاملة",
-    hero_description: "أساعد الأفراد والشركات على بناء حلول رقمية احترافية تلبي احتياجاتهم وتنمو مع أعمالهم."
+    hero_description: "أساعد الأفراد والشركات على بناء حلول رقمية احترافية."
   },
   services: [
     { id: 1, title: "تطوير المواقع", description: "مواقع سريعة ومتجاوبة", icon: "🌐" },
-    { id: 2, title: "أنظمة ERP", description: "أنظمة إدارة موارد المؤسسات", icon: "📊" },
+    { id: 2, title: "أنظمة ERP", description: "أنظمة إدارة موارد", icon: "📊" },
     { id: 3, title: "تطوير التطبيقات", description: "تطبيقات ويب وموبايل", icon: "📱" },
     { id: 4, title: "الاستشارات التقنية", description: "استشارات تقنية", icon: "💡" }
   ],
   projects: [
-    { id: 1, title: "موقع شجرة النسب", description: "منصة شجرة العائلة", image: "", link: "https://genealogygenealogy.netlify.app/" },
-    { id: 2, title: "نظام ERP", description: "نظام ERP متكامل", image: "", link: "https://mohamed-abdalwhab-erp-bay.vercel.app" }
+    { id: 1, title: "موقع شجرة النسب", description: "منصة شجرة العائلة", image: "", link: "https://genealogygenealogy.netlify.app/" }
   ],
   contact_info: {
     whatsapp: "249960491276",
