@@ -9,6 +9,7 @@ let editingProjectId = null;
 // عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", async () => {
   // التأكد من وجود Supabase client
+  console.log("Supabase initialized:", supabase ? "✅" : "❌", "URL:", SUPABASE_URL);
   if (!supabase) {
     alert("خطأ في تحميل Supabase. تأكد من اتصال الإنترنت.");
     return;
@@ -54,7 +55,7 @@ function setupLogin() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      errorEl.textContent = "❌ " + error.message;
+      errorEl.textContent = "❌ " + error.message + " (Status: " + (error.status || "?") + ") | Code: " + (error.code || "?");
       errorEl.classList.add("show");
       return;
     }
