@@ -1,0 +1,17 @@
+# ملفات النظام
+.DS_Store
+Thumbs.db
+
+# ملفات المحرر
+.vscode/
+.idea/
+*.swp
+*~
+
+# سجلات
+*.log
+npm-debug.log*
+
+# بيئة
+node_modules/
+.env

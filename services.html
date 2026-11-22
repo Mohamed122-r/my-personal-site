@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>خدماتي — محمد عبد الوهاب</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo"><a href="index.html" style="text-decoration:none; color:inherit;">محمد عبد الوهاب</a></div>
+      <ul class="nav-links">
+        <li><a href="index.html">الرئيسية</a></li>
+        <li><a href="services.html" style="color:var(--primary);">خدماتي</a></li>
+        <li><a href="projects.html">أعمالي</a></li>
+        <li><a href="order.html">اطلب خدمة</a></li>
+        <li><a href="contact.html">تواصل</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="section" style="min-height: 80vh; padding-top: 50px;">
+    <div class="container">
+      <h2 class="section-title">خدماتي</h2>
+      <p class="section-subtitle">حلول تقنية متكاملة تناسب احتياجاتك</p>
+      <div class="services-grid" id="services-grid"></div>
+    </div>
+  </section>
+
+  <footer class="footer"><p>© <span id="year"></span> محمد عبد الوهاب — جميع الحقوق محفوظة</p></footer>
+  <a href="#" class="whatsapp-float" id="whatsapp-float" target="_blank">💬</a>
+  
+  <div class="mobile-bottom-nav">
+    <a href="index.html"><span>🏠</span>الرئيسية</a>
+    <a href="services.html" class="active"><span>💼</span>خدماتي</a>
+    <a href="projects.html"><span>🖼️</span>أعمالي</a>
+    <a href="order.html"><span>📝</span>اطلب</a>
+    <a href="contact.html"><span>📞</span>تواصل</a>
+  </div>
+
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
