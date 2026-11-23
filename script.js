@@ -1,20 +1,48 @@
+// ============================================
+// منطق الموقع — يجلب البيانات من Supabase
+// ============================================
+
 document.addEventListener("DOMContentLoaded", async () => {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  const data = await loadData();
-
-  if (document.getElementById("hero-title")) renderHero(data.site_content);
-  if (document.getElementById("services-grid")) renderServices(data.services);
-  if (document.getElementById("projects-grid")) renderProjects(data.projects);
-  if (document.getElementById("contact-grid")) renderContact(data.contact_info);
-  
-  setupWhatsAppFloat(data.contact_info.whatsapp);
-  if (document.getElementById("order-form")) setupOrderForm();
+  try {
+    const data = await loadData();
+    if (document.getElementById("hero-title")) renderHero(data.site_content);
+    if (document.getElementById("services-grid")) renderServices(data.services);
+    if (document.getElementById("projects-grid")) renderProjects(data.projects);
+    if (document.getElementById("contact-grid")) renderContact(data.contact_info);
+    if (data.contact_info) setupWhatsAppFloat(data.contact_info.whatsapp);
+    if (document.getElementById("order-form")) setupOrderForm();
+  } catch (error) {
+    console.error("خطأ:", error);
+    fallbackToMock();
+  }
 });
 
 async function loadData() {
-  return MOCK_DATA; // سيتم ربطها بـ Supabase لاحقاً
+  const [siteContent, services, projects, contactInfo] = await Promise.all([
+    supabaseClient.select("site_content"),
+    supabaseClient.select("services"),
+    supabaseClient.select("projects"),
+    supabaseClient.select("contact_info")
+  ]);
+  return {
+    site_content: siteContent[0] || {},
+    services: services.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
+    projects: projects.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
+    contact_info: contactInfo[0] || {}
+  };
+}
+
+function fallbackToMock() {
+  console.warn("استخدام بيانات احتياطية");
+  if (document.getElementById("hero-title")) renderHero(MOCK_DATA.site_content);
+  if (document.getElementById("services-grid")) renderServices(MOCK_DATA.services);
+  if (document.getElementById("projects-grid")) renderProjects(MOCK_DATA.projects);
+  if (document.getElementById("contact-grid")) renderContact(MOCK_DATA.contact_info);
+  setupWhatsAppFloat(MOCK_DATA.contact_info.whatsapp);
+  if (document.getElementById("order-form")) setupOrderForm();
 }
 
 function renderHero(content) {
@@ -26,19 +54,25 @@ function renderHero(content) {
 
 function renderServices(services) {
   const grid = document.getElementById("services-grid");
-  if (!services || !services.length) return;
+  if (!services || !services.length) {
+    grid.innerHTML = "<p style='text-align:center;color:#64748b;'>لا توجد خدمات حالياً</p>";
+    return;
+  }
   grid.innerHTML = services.map((s) => `
     <div class="service-card">
       <div class="service-icon">${s.icon || "⚙️"}</div>
       <h3>${s.title}</h3>
-      <p>${s.description}</p>
+      <p>${s.description || ""}</p>
     </div>
   `).join("");
 }
 
 function renderProjects(projects) {
   const grid = document.getElementById("projects-grid");
-  if (!projects || !projects.length) return;
+  if (!projects || !projects.length) {
+    grid.innerHTML = "<p style='text-align:center;color:#64748b;'>لا توجد أعمال حالياً</p>";
+    return;
+  }
   grid.innerHTML = projects.map((p) => `
     <div class="project-card">
       <div class="project-image">
@@ -73,7 +107,7 @@ function renderContact(info) {
 
 function setupWhatsAppFloat(number) {
   const btn = document.getElementById("whatsapp-float");
-  if (btn) btn.href = `https://wa.me/${number}`;
+  if (btn && number) btn.href = `https://wa.me/${number}`;
 }
 
 function setupOrderForm() {
@@ -82,19 +116,20 @@ function setupOrderForm() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     msg.className = "form-message";
+    msg.textContent = "جاري الإرسال...";
     const formData = {
       name: form.name.value.trim(),
       contact: form.contact.value.trim(),
       service_type: form.service_type.value,
-      details: form.details.value.trim(),
-      created_at: new Date().toISOString()
+      details: form.details.value.trim()
     };
     try {
-      console.log("طلب جديد:", formData);
+      await supabaseClient.insert("requests", formData);
       msg.className = "form-message success";
       msg.textContent = "✅ تم إرسال طلبك بنجاح! سأرد عليك قريباً.";
       form.reset();
     } catch (err) {
+      console.error(err);
       msg.className = "form-message error";
       msg.textContent = "❌ حدث خطأ، حاول مرة أخرى.";
     }
