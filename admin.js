@@ -31,7 +31,8 @@ function showAdmin(user) {
   document.getElementById("login-screen").style.display = "none";
   document.getElementById("admin-screen").style.display = "block";
   document.getElementById("admin-email").textContent = user.email;
-  loadAll();
+  // تأخير بسيط لضمان جاهزية DOM
+  setTimeout(() => loadAll(), 300);
 }
 
 function setupLogin() {
@@ -78,7 +79,9 @@ async function loadAll() {
 
 // ========== محتوى الصفحة ==========
 async function loadContent() {
+  console.log("📥 جاري تحميل محتوى الصفحة...");
   const { data, error } = await supabase.from("site_content").select("*");
+  console.log("📦 البيانات:", data, "| خطأ:", error);
   if (error) { console.error(error); return; }
   const content = (data && data[0]) || {};
   document.getElementById("hero-title-input").value = content.hero_title || "";
