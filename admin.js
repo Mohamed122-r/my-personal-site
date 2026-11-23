@@ -1,18 +1,5 @@
-alert("DIAG_TEST: admin.js loaded");
 
 // اختبار الاتصال بـ Supabase
-setTimeout(async () => {
-  try {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) {
-      alert("🔴 خطأ Supabase: " + error.message);
-    } else {
-      console.log("✅ Supabase متصل، session:", data.session);
-    }
-  } catch (e) {
-    alert("🔴 خطأ فادح: " + e.message);
-  }
-}, 1000);
 // ============================================
 // منطق لوحة التحكم
 // ============================================
