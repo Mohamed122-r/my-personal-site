@@ -1,37 +1,26 @@
-
-// اختبار الاتصال بـ Supabase
 // ============================================
-// منطق لوحة التحكم
+// لوحة التحكم — باستخدام supabase الرسمي
 // ============================================
 
 let currentUser = null;
 let editingServiceId = null;
 let editingProjectId = null;
 
-// عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", async () => {
-  // التأكد من وجود Supabase client
-  console.log("Supabase initialized:", supabase ? "✅" : "❌", "URL:", SUPABASE_URL);
   if (!supabase) {
-    alert("خطأ في تحميل Supabase. تأكد من اتصال الإنترنت.");
+    alert("❌ لم يتم تحميل Supabase. تحقق من الإنترنت.");
     return;
   }
 
-  // التحقق من وجود جلسة سابقة
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    showAdmin(session.user);
-  } else {
-    showLogin();
-  }
+  if (session) showAdmin(session.user);
+  else showLogin();
 
   setupLogin();
   setupLogout();
   setupTabs();
-  setupForms();
 });
 
-// ========== تسجيل الدخول ==========
 function showLogin() {
   document.getElementById("login-screen").style.display = "flex";
   document.getElementById("admin-screen").style.display = "none";
@@ -54,18 +43,10 @@ function setupLogin() {
     const errorEl = document.getElementById("login-error");
     errorEl.classList.remove("show");
 
-    let data, error;
-    try {
-      const result = await supabase.auth.signInWithPassword({ email, password });
-      data = result.data;
-      error = result.error;
-    } catch (e) {
-      alert("🔴 خطأ في الاتصال: " + e.message);
-      return;
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      errorEl.textContent = "❌ " + error.message + " (Status: " + (error.status || "?") + ") | Code: " + (error.code || "?");
+      errorEl.textContent = "❌ " + error.message;
       errorEl.classList.add("show");
       return;
     }
@@ -80,7 +61,6 @@ function setupLogout() {
   });
 }
 
-// ========== التبويبات ==========
 function setupTabs() {
   document.querySelectorAll(".admin-tab").forEach((tab) => {
     tab.addEventListener("click", () => {
@@ -92,21 +72,15 @@ function setupTabs() {
   });
 }
 
-// ========== تحميل كل البيانات ==========
 async function loadAll() {
-  await Promise.all([
-    loadContent(),
-    loadServices(),
-    loadProjects(),
-    loadRequests(),
-    loadContact()
-  ]);
+  await Promise.all([loadContent(), loadServices(), loadProjects(), loadRequests(), loadContact()]);
 }
 
 // ========== محتوى الصفحة ==========
 async function loadContent() {
-  const data = await supabaseClient.select("site_content");
-  const content = data[0] || {};
+  const { data, error } = await supabase.from("site_content").select("*");
+  if (error) { console.error(error); return; }
+  const content = (data && data[0]) || {};
   document.getElementById("hero-title-input").value = content.hero_title || "";
   document.getElementById("hero-subtitle-input").value = content.hero_subtitle || "";
   document.getElementById("hero-description-input").value = content.hero_description || "";
@@ -114,38 +88,41 @@ async function loadContent() {
 
 document.getElementById("form-content").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const data = await supabaseClient.select("site_content");
-  const id = data[0]?.id;
   const updates = {
     hero_title: document.getElementById("hero-title-input").value,
     hero_subtitle: document.getElementById("hero-subtitle-input").value,
     hero_description: document.getElementById("hero-description-input").value
   };
   try {
-    if (id) await supabaseClient.update("site_content", id, updates);
-    else await supabaseClient.insert("site_content", updates);
+    const { data: existing } = await supabase.from("site_content").select("id");
+    const id = existing && existing[0] ? existing[0].id : null;
+    if (id) {
+      const { error } = await supabase.from("site_content").update(updates).eq("id", id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from("site_content").insert(updates);
+      if (error) throw error;
+    }
     toast("✅ تم حفظ المحتوى");
   } catch (err) {
-    toast("❌ " + err.message, true);
+    toast("❌ " + (err.message || err), true);
   }
 });
 
 // ========== الخدمات ==========
 async function loadServices() {
-  const services = await supabaseClient.select("services");
+  const { data: services, error } = await supabase.from("services").select("*").order("sort_order");
+  if (error) { console.error(error); return; }
   const list = document.getElementById("services-list");
   if (!services || !services.length) {
-    list.innerHTML = "<p class='loading'>لا توجد خدمات. أضف خدمتك الأولى.</p>";
+    list.innerHTML = "<p class='loading'>لا توجد خدمات.</p>";
     return;
   }
   list.innerHTML = services.map(s => `
     <div class="item-row">
-      <div class="info">
-        <h4>${s.icon || "⚙️"} ${s.title}</h4>
-        <p>${s.description || ""}</p>
-      </div>
+      <div class="info"><h4>${s.icon || "⚙️"} ${s.title}</h4><p>${s.description || ""}</p></div>
       <div class="actions">
-        <button class="btn-sm btn-edit" onclick="editService(${s.id}, '${escape(s.title)}', '${escape(s.description || "")}', '${s.icon || ""}')">✏️</button>
+        <button class="btn-sm btn-edit" onclick="editService(${s.id}, '${escape(s.title)}', '${escape(s.description || "")}', '${escape(s.icon || "")}')">✏️</button>
         <button class="btn-sm btn-del" onclick="deleteService(${s.id})">🗑️</button>
       </div>
     </div>
@@ -161,16 +138,18 @@ document.getElementById("form-service").addEventListener("submit", async (e) => 
   };
   try {
     if (editingServiceId) {
-      await supabaseClient.update("services", editingServiceId, data);
+      const { error } = await supabase.from("services").update(data).eq("id", editingServiceId);
+      if (error) throw error;
       toast("✅ تم تحديث الخدمة");
     } else {
-      await supabaseClient.insert("services", data);
+      const { error } = await supabase.from("services").insert(data);
+      if (error) throw error;
       toast("✅ تمت إضافة الخدمة");
     }
     resetServiceForm();
     loadServices();
   } catch (err) {
-    toast("❌ " + err.message, true);
+    toast("❌ " + (err.message || err), true);
   }
 });
 
@@ -181,7 +160,6 @@ function editService(id, title, description, icon) {
   document.getElementById("service-icon").value = icon;
   document.getElementById("btn-service-submit").textContent = "💾 تحديث";
   document.getElementById("btn-service-cancel").style.display = "inline-block";
-  document.getElementById("service-title").focus();
 }
 
 function resetServiceForm() {
@@ -196,28 +174,27 @@ document.getElementById("btn-service-cancel").addEventListener("click", resetSer
 async function deleteService(id) {
   if (!confirm("هل تريد حذف هذه الخدمة؟")) return;
   try {
-    await supabaseClient.delete("services", id);
+    const { error } = await supabase.from("services").delete().eq("id", id);
+    if (error) throw error;
     toast("🗑️ تم حذف الخدمة");
     loadServices();
   } catch (err) {
-    toast("❌ " + err.message, true);
+    toast("❌ " + (err.message || err), true);
   }
 }
 
 // ========== الأعمال ==========
 async function loadProjects() {
-  const projects = await supabaseClient.select("projects");
+  const { data: projects, error } = await supabase.from("projects").select("*").order("sort_order");
+  if (error) { console.error(error); return; }
   const list = document.getElementById("projects-list");
   if (!projects || !projects.length) {
-    list.innerHTML = "<p class='loading'>لا توجد أعمال. أضف مشروعك الأول.</p>";
+    list.innerHTML = "<p class='loading'>لا توجد أعمال.</p>";
     return;
   }
   list.innerHTML = projects.map(p => `
     <div class="item-row">
-      <div class="info">
-        <h4>${p.title}</h4>
-        <p>${p.description || ""}</p>
-      </div>
+      <div class="info"><h4>${p.title}</h4><p>${p.description || ""}</p></div>
       <div class="actions">
         <button class="btn-sm btn-edit" onclick='editProject(${p.id}, ${JSON.stringify(p.title)}, ${JSON.stringify(p.description || "")}, ${JSON.stringify(p.image || "")}, ${JSON.stringify(p.link || "")})'>✏️</button>
         <button class="btn-sm btn-del" onclick="deleteProject(${p.id})">🗑️</button>
@@ -236,16 +213,18 @@ document.getElementById("form-project").addEventListener("submit", async (e) => 
   };
   try {
     if (editingProjectId) {
-      await supabaseClient.update("projects", editingProjectId, data);
+      const { error } = await supabase.from("projects").update(data).eq("id", editingProjectId);
+      if (error) throw error;
       toast("✅ تم تحديث المشروع");
     } else {
-      await supabaseClient.insert("projects", data);
+      const { error } = await supabase.from("projects").insert(data);
+      if (error) throw error;
       toast("✅ تمت إضافة المشروع");
     }
     resetProjectForm();
     loadProjects();
   } catch (err) {
-    toast("❌ " + err.message, true);
+    toast("❌ " + (err.message || err), true);
   }
 });
 
@@ -257,7 +236,6 @@ function editProject(id, title, description, image, link) {
   document.getElementById("project-link").value = link;
   document.getElementById("btn-project-submit").textContent = "💾 تحديث";
   document.getElementById("btn-project-cancel").style.display = "inline-block";
-  document.getElementById("project-title").focus();
 }
 
 function resetProjectForm() {
@@ -272,11 +250,12 @@ document.getElementById("btn-project-cancel").addEventListener("click", resetPro
 async function deleteProject(id) {
   if (!confirm("هل تريد حذف هذا المشروع؟")) return;
   try {
-    await supabaseClient.delete("projects", id);
+    const { error } = await supabase.from("projects").delete().eq("id", id);
+    if (error) throw error;
     toast("🗑️ تم حذف المشروع");
     loadProjects();
   } catch (err) {
-    toast("❌ " + err.message, true);
+    toast("❌ " + (err.message || err), true);
   }
 }
 
@@ -284,51 +263,39 @@ async function deleteProject(id) {
 async function loadRequests() {
   const container = document.getElementById("requests-container");
   container.innerHTML = "<p class='loading'>جاري التحميل...</p>";
-  try {
-    const { data, error } = await supabase
-      .from("requests")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    if (!data || !data.length) {
-      container.innerHTML = "<p class='loading'>لا توجد طلبات حالياً.</p>";
-      return;
-    }
-    container.innerHTML = `
-      <table class="requests-table">
-        <thead>
-          <tr>
-            <th>التاريخ</th>
-            <th>الاسم</th>
-            <th>التواصل</th>
-            <th>الخدمة</th>
-            <th>التفاصيل</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${data.map(r => `
-            <tr>
-              <td>${new Date(r.created_at).toLocaleDateString("ar-EG")}</td>
-              <td>${r.name}</td>
-              <td>${r.contact}</td>
-              <td>${r.service_type || "-"}</td>
-              <td style="max-width:300px; white-space:normal;">${r.details || "-"}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    `;
-  } catch (err) {
-    container.innerHTML = `<p class='loading'>❌ ${err.message}</p>`;
+  const { data, error } = await supabase.from("requests").select("*").order("created_at", { ascending: false });
+  if (error) {
+    container.innerHTML = `<p class='loading'>❌ ${error.message}</p>`;
+    return;
   }
+  if (!data || !data.length) {
+    container.innerHTML = "<p class='loading'>لا توجد طلبات.</p>";
+    return;
+  }
+  container.innerHTML = `
+    <table class="requests-table">
+      <thead><tr><th>التاريخ</th><th>الاسم</th><th>التواصل</th><th>الخدمة</th><th>التفاصيل</th></tr></thead>
+      <tbody>
+        ${data.map(r => `
+          <tr>
+            <td>${new Date(r.created_at).toLocaleDateString("ar-EG")}</td>
+            <td>${r.name}</td>
+            <td>${r.contact}</td>
+            <td>${r.service_type || "-"}</td>
+            <td style="max-width:300px; white-space:normal;">${r.details || "-"}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>`;
 }
 
 document.getElementById("btn-refresh-requests").addEventListener("click", loadRequests);
 
 // ========== التواصل ==========
 async function loadContact() {
-  const data = await supabaseClient.select("contact_info");
-  const info = data[0] || {};
+  const { data, error } = await supabase.from("contact_info").select("*");
+  if (error) { console.error(error); return; }
+  const info = (data && data[0]) || {};
   document.getElementById("contact-whatsapp").value = info.whatsapp || "";
   document.getElementById("contact-mostaql").value = info.mostaql || "";
   document.getElementById("contact-khamsat").value = info.khamsat || "";
@@ -337,8 +304,6 @@ async function loadContact() {
 
 document.getElementById("form-contact").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const data = await supabaseClient.select("contact_info");
-  const id = data[0]?.id;
   const updates = {
     whatsapp: document.getElementById("contact-whatsapp").value,
     mostaql: document.getElementById("contact-mostaql").value,
@@ -346,11 +311,18 @@ document.getElementById("form-contact").addEventListener("submit", async (e) => 
     email: document.getElementById("contact-email").value
   };
   try {
-    if (id) await supabaseClient.update("contact_info", id, updates);
-    else await supabaseClient.insert("contact_info", updates);
+    const { data: existing } = await supabase.from("contact_info").select("id");
+    const id = existing && existing[0] ? existing[0].id : null;
+    if (id) {
+      const { error } = await supabase.from("contact_info").update(updates).eq("id", id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from("contact_info").insert(updates);
+      if (error) throw error;
+    }
     toast("✅ تم حفظ معلومات التواصل");
   } catch (err) {
-    toast("❌ " + err.message, true);
+    toast("❌ " + (err.message || err), true);
   }
 });
 
@@ -363,7 +335,6 @@ function toast(message, isError = false) {
   setTimeout(() => el.classList.remove("show"), 3000);
 }
 
-// دالة مساعدة
 function escape(str) {
   return (str || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
