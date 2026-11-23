@@ -1,3 +1,18 @@
+alert("DIAG_TEST: admin.js loaded");
+
+// اختبار الاتصال بـ Supabase
+setTimeout(async () => {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      alert("🔴 خطأ Supabase: " + error.message);
+    } else {
+      console.log("✅ Supabase متصل، session:", data.session);
+    }
+  } catch (e) {
+    alert("🔴 خطأ فادح: " + e.message);
+  }
+}, 1000);
 // ============================================
 // منطق لوحة التحكم
 // ============================================
@@ -52,7 +67,15 @@ function setupLogin() {
     const errorEl = document.getElementById("login-error");
     errorEl.classList.remove("show");
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    let data, error;
+    try {
+      const result = await supabase.auth.signInWithPassword({ email, password });
+      data = result.data;
+      error = result.error;
+    } catch (e) {
+      alert("🔴 خطأ في الاتصال: " + e.message);
+      return;
+    }
 
     if (error) {
       errorEl.textContent = "❌ " + error.message + " (Status: " + (error.status || "?") + ") | Code: " + (error.code || "?");
